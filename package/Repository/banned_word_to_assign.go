@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"math/big"
 
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
@@ -17,8 +18,8 @@ func NewBannedWordToAssignService(db *sqlx.DB) *BannedWordToAssignPostgres {
 
 func (r *BannedWordToAssignPostgres) CreateBannedWordToAssign(bannedwordtoassign models.BannedWordToAssign) (big.Int, error) {
 	var id big.Int
-	query := "INSERT INTO $1 (assign_id, banned_word_id) VALUES ($2, $3) RETURNING id"
-	row := r.db.QueryRow(query, bannedWordsToAssignTable, bannedwordtoassign.AssignID, bannedwordtoassign.BannedWordID)
+	query := fmt.Sprintf("INSERT INTO %s (assign_id, banned_word_id) VALUES ($1, $2) RETURNING id", bannedWordsToAssignTable)
+	row := r.db.QueryRow(query, bannedwordtoassign.AssignID, bannedwordtoassign.BannedWordID)
 	if err := row.Scan(&id); err != nil {
 		return *big.NewInt(0), err
 	}
@@ -31,8 +32,8 @@ func (r *BannedWordToAssignPostgres) GetBannedWordByAssignID(id big.Int) ([]int,
 		tempAssignId             big.Int
 		tempBannedWordToAssignID big.Int
 	)
-	query := "SELECT banned_word_id FROM $1 WHERE assign_id=$2"
-	rows, err := r.db.Query(query, bannedWordsToAssignTable)
+	query := fmt.Sprintf("SELECT banned_word_id FROM %s WHERE assign_id=$1", bannedWordsToAssignTable)
+	rows, err := r.db.Query(query, id)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	"github.com/jmoiron/sqlx"
 )
@@ -15,8 +17,8 @@ func NewDatabaseService(db *sqlx.DB) *DatabasePostgres {
 
 func (r *DatabasePostgres) CreateDatabase(database models.Database) (int, error) {
 	var id int
-	query := "INSERT INTO $1 (name, description, creation_script, dbms_id) VALUES ($2, $3, $4, $5) RETURNING id"
-	row := r.db.QueryRow(query, databasesTable, database.Name, database.Description, database.CreationScript, database.DbmsID)
+	query := fmt.Sprintf("INSERT INTO %s (name, description, creation_script, dbms_id) VALUES ($1, $2, $3, $4) RETURNING id", databasesTable)
+	row := r.db.QueryRow(query, database.Name, database.Description, database.CreationScript, database.DbmsID)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -25,8 +27,8 @@ func (r *DatabasePostgres) CreateDatabase(database models.Database) (int, error)
 
 func (r *DatabasePostgres) GetDatabaseByID(id int) (models.Database, error) {
 	var database models.Database
-	query := "SELECT * FROM $1 WHERE id=$2"
-	row := r.db.QueryRow(query, databasesTable, id)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", databasesTable)
+	row := r.db.QueryRow(query, id)
 	if err := row.Scan(&database.ID, &database.Name, &database.Description, &database.CreationScript, &database.DbmsID); err != nil {
 		return database, err
 	}
@@ -35,8 +37,8 @@ func (r *DatabasePostgres) GetDatabaseByID(id int) (models.Database, error) {
 
 func (r *DatabasePostgres) GetAllDatabases() ([]models.Database, error) {
 	var databases []models.Database
-	query := "SELECT * FROM $1"
-	rows, err := r.db.Query(query, databasesTable)
+	query := fmt.Sprintf("SELECT * FROM %s", databasesTable)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -54,4 +56,3 @@ func (r *DatabasePostgres) GetAllDatabases() ([]models.Database, error) {
 	}
 	return databases, nil
 }
-

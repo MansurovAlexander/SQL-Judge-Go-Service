@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	"github.com/jmoiron/sqlx"
 )
@@ -15,8 +17,8 @@ func NewBannedWordService(db *sqlx.DB) *BannedWordPostgres {
 
 func (r *BannedWordPostgres) CreateBannedWord(bannedword models.BannedWord) (int, error) {
 	var id int
-	query := "INSERT INTO $1 (banned_word) VALUES ($2) RETURNING id"
-	row := r.db.QueryRow(query, bannedWordsTable, bannedword.BannedWord)
+	query := fmt.Sprintf("INSERT INTO %s (banned_word) VALUES ($1) RETURNING id", bannedWordsTable)
+	row := r.db.QueryRow(query, bannedword.BannedWord)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -25,8 +27,8 @@ func (r *BannedWordPostgres) CreateBannedWord(bannedword models.BannedWord) (int
 
 func (r *BannedWordPostgres) GetBannedWordByID(id int) (models.BannedWord, error) {
 	var bannedword models.BannedWord
-	query := "SELECT * FROM $1 WHERE id=$2"
-	row := r.db.QueryRow(query, bannedWordsTable, id)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", bannedWordsTable)
+	row := r.db.QueryRow(query, id)
 	if err := row.Scan(&bannedword.ID, &bannedword.BannedWord); err != nil {
 		return bannedword, err
 	}
@@ -35,8 +37,8 @@ func (r *BannedWordPostgres) GetBannedWordByID(id int) (models.BannedWord, error
 
 func (r *BannedWordPostgres) GetAllBannedWords() ([]models.BannedWord, error) {
 	var bannedwords []models.BannedWord
-	query := "SELECT * FROM $1"
-	rows, err := r.db.Query(query, bannedWordsTable)
+	query := fmt.Sprintf("SELECT * FROM %s", bannedWordsTable)
+	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -53,4 +55,3 @@ func (r *BannedWordPostgres) GetAllBannedWords() ([]models.BannedWord, error) {
 	}
 	return bannedwords, nil
 }
-
