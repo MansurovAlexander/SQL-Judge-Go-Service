@@ -6,6 +6,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	dbmsTable           = "dbms"
+	databasesTable      = "databases"
+	assignTable         = "assign"
+	submissionTable     = "submission"
+	bannedWordsTable    = "banned_words"
+	bannedWordsToAssignTable = "banned_words_to_assign"
+)
+
 type Config struct {
 	Host     string
 	Port     string
