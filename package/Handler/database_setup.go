@@ -51,20 +51,35 @@ func (h *Handler) getDbmsByID(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"id":   dbms.ID,
-		"name": dbms.Name,
-	})
+	c.JSON(http.StatusOK, dbms)
 }
 
 func (h *Handler) getAllDbms(c *gin.Context) {
-
+	dbmsList, err := h.services.Dbms.GetAllDbms()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	c.JSON(http.StatusOK, dbmsList)
 }
 
 func (h *Handler) getDataBaseByID(c *gin.Context) {
-
+	input, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	database, err := h.services.Database.GetDataBaseByID(input)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, database)
 }
 
 func (h *Handler) getAllDataBases(c *gin.Context) {
-
+	databasesList, err := h.services.Database.GetAllDatabases()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	c.JSON(http.StatusOK, databasesList)
 }

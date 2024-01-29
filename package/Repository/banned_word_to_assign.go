@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/big"
 
-	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,10 +15,10 @@ func NewBannedWordToAssignService(db *sqlx.DB) *BannedWordToAssignPostgres {
 	return &BannedWordToAssignPostgres{db: db}
 }
 
-func (r *BannedWordToAssignPostgres) CreateBannedWordToAssign(bannedwordtoassign models.BannedWordToAssign) (big.Int, error) {
+func (r *BannedWordToAssignPostgres) CreateBannedWordToAssign(assignID big.Int, bannedWordID int) (big.Int, error) {
 	var id big.Int
 	query := fmt.Sprintf("INSERT INTO %s (assign_id, banned_word_id) VALUES ($1, $2) RETURNING id", bannedWordsToAssignTable)
-	row := r.db.QueryRow(query, bannedwordtoassign.AssignID, bannedwordtoassign.BannedWordID)
+	row := r.db.QueryRow(query, assignID, bannedWordID)
 	if err := row.Scan(&id); err != nil {
 		return *big.NewInt(0), err
 	}

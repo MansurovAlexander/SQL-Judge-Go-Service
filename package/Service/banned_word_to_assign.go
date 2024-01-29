@@ -3,7 +3,6 @@ package service
 import (
 	"math/big"
 
-	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	repository "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Repository"
 )
 
@@ -15,8 +14,8 @@ func NewBannedWordToAssignService(repo repository.BannedWordToAssign) *BannedWor
 	return &BannedWordToAssignService{repo}
 }
 
-func (s *BannedWordToAssignService) CreateBannedWordToAssign(bannedWordToAssign models.BannedWordToAssign) (big.Int, error) {
-	return s.repo.CreateBannedWordToAssign(bannedWordToAssign)
+func (s *BannedWordToAssignService) CreateBannedWordToAssign(assignID big.Int, bannedWordID int) (big.Int, error) {
+	return s.repo.CreateBannedWordToAssign(assignID, bannedWordID)
 }
 
 func (s *BannedWordToAssignService) GetBannedWordByAssignID(id big.Int) ([]int, error) {

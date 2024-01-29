@@ -32,7 +32,7 @@ type Assign interface {
 }
 
 type BannedWordToAssign interface {
-	CreateBannedWordToAssign(models.BannedWordToAssign) (big.Int, error)
+	CreateBannedWordToAssign(assignId big.Int, bannedWordID int) (big.Int, error)
 	GetBannedWordByAssignID(assignId big.Int) ([]int, error)
 }
 
@@ -42,6 +42,10 @@ type Submission interface {
 	GetAllSubmissions() ([]models.Submission, error)
 }
 
+type Judge interface {
+	CheckSubmission(submission models.Submission) (string, error)
+}
+
 type Repository struct {
 	Database
 	Dbms
@@ -49,6 +53,7 @@ type Repository struct {
 	BannedWord
 	BannedWordToAssign
 	Submission
+	Judge
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -59,5 +64,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		BannedWord:         NewBannedWordService(db),
 		BannedWordToAssign: NewBannedWordToAssignService(db),
 		Submission:         NewSubmissionService(db),
+		Judge:              NewJudgeService(db),
 	}
 }
