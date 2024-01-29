@@ -3,7 +3,7 @@ package models
 import "math/big"
 
 type Submission struct {
-	ID        big.Int `json:"submissionId" binding:"required"`
+	ID        big.Int `json:"submissionId"`
 	AssignID  big.Int `json:"assignId" binding:"required"`
 	StudentID big.Int `json:"studentId" binding:"required"`
 	Time      int     `json:"time"`

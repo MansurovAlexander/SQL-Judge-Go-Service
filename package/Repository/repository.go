@@ -43,7 +43,7 @@ type Submission interface {
 }
 
 type Judge interface {
-	CheckSubmission(submission models.Submission) (string, error)
+	CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID big.Int, timeLimit, memoryLimit int) (big.Int, error)
 }
 
 type Repository struct {

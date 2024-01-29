@@ -1,9 +1,11 @@
 package repository
 
 import (
-	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
-	viewmodels "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/ViewModels"
+	"fmt"
+	"math/big"
+
 	"github.com/jmoiron/sqlx"
+	"github.com/spf13/viper"
 )
 
 type JudgePostgres struct {
@@ -14,24 +16,87 @@ func NewJudgeService(db *sqlx.DB) *JudgePostgres {
 	return &JudgePostgres{db: db}
 }
 
-func (r *JudgePostgres) CheckSubmission(submission models.Submission) (string, error) {
+func (r *JudgePostgres) CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID big.Int, timeLimit, memoryLimit int) (big.Int, error) {
+	if err := initConfig(); err != nil {
+		return *big.NewInt(-1), err
+	}
+	cfg := Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: viper.GetString("db.password"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	}
 	transaction, err := r.db.Begin()
 	if err != nil {
-		return "", err
+		return *big.NewInt(-1), err
 	}
-	var (
-		assign           viewmodels.AssignViewModel
-		dbCreationScript string
-		dbmsName         string
-		//bannedWords []string
-	)
-	query := "(SELECT a.id, a.time_limit, a.memory_limit, a.correct_script, db.creation_script, dbms.name FROM assign a JOIN databases db on (a.db_id=db.id)) JOIN dbms on (db.dbms_id=dbms.id) WHERE a.id=$1"
-	row := r.db.QueryRow(query, submission.AssignID)
-	if err := row.Scan(&assign.ID, &assign.TimeLimit, &assign.MemoryLimit, &assign.CorrectScript, &dbCreationScript, &dbmsName); err != nil {
-		return "", err
+	_, err = r.db.Exec(dbCreateScript)
+	if err != nil {
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	testDB, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.Username, dbName, cfg.Password, cfg.SSLMode))
+	if err != nil {
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	if err = testDB.Ping(); err != nil {
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	initSavepoint, err := testDB.Begin()
+	if err != nil {
+		initSavepoint.Rollback()
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	correctAnswer, err := testDB.Query(correctScript)
+	if err != nil {
+		initSavepoint.Rollback()
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	err = initSavepoint.Rollback()
+	if err != nil {
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	initSavepoint, err = testDB.Begin()
+	if err != nil {
+		initSavepoint.Rollback()
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	studentAnswer, err := testDB.Query(inputedScript)
+	if err != nil {
+		initSavepoint.Rollback()
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	err = initSavepoint.Rollback()
+	if err != nil {
+		transaction.Rollback()
+		return *big.NewInt(-1), err
+	}
+	if correctAnswer != studentAnswer {
+		var id big.Int
+		query := "INSERT INTO submission(assign_id, student_id, time, memory, script, grade) VALUES ($1,$2,$3,$4,$5,$6) returning id"
+		row := r.db.QueryRow(query, assignID, studentID, 0, 0, inputedScript, "Неправильный вывод!")
+		if err := row.Scan(&id); err != nil {
+			return *big.NewInt(-1), err
+		}
+		return id, nil
 	}
 	if err := transaction.Rollback(); err != nil {
-		return "", err
+		return *big.NewInt(-1), err
 	}
-	return "test", nil
+	return *big.NewInt(-1), nil
+}
+
+func initConfig() error {
+	viper.AddConfigPath("configs")
+	viper.SetConfigName("config")
+	return viper.ReadInConfig()
 }
