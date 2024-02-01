@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"math/big"
 	"net/http"
 
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
@@ -27,12 +26,13 @@ func (h *Handler) createBannedWord(c *gin.Context) {
 
 func (h *Handler) createAssign(c *gin.Context) {
 	var input viewmodels.AssignViewModel
-	var bannedWordsToAssignIds []big.Int
+	var bannedWordsToAssignIds []int
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	var assignInputedData models.Assign
+	assignInputedData.ID=input.ID
 	assignInputedData.TimeLimit = input.TimeLimit
 	assignInputedData.MemoryLimit = input.MemoryLimit
 	assignInputedData.CorrectScript = input.CorrectScript
@@ -57,7 +57,7 @@ func (h *Handler) createAssign(c *gin.Context) {
 }
 
 func (h *Handler) getAssignByID(c *gin.Context) {
-	var input big.Int
+	var input int
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

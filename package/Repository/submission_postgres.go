@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"math/big"
 
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	"github.com/jmoiron/sqlx"
@@ -16,17 +15,17 @@ func NewSubmissionService(db *sqlx.DB) *SubmissionPostgres {
 	return &SubmissionPostgres{db: db}
 }
 
-func (r *SubmissionPostgres) CreateSubmission(submission models.Submission) (big.Int, error) {
-	var id big.Int
+func (r *SubmissionPostgres) CreateSubmission(submission models.Submission) (int, error) {
+	var id int
 	query := fmt.Sprintf("INSERT INTO %s (student_id, time, memory, script, grade, assign_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", submissionTable)
 	row := r.db.QueryRow(query, submission.StudentID, submission.Time, submission.Memory, submission.Script, submission.Grade, submission.AssignID)
 	if err := row.Scan(&id); err != nil {
-		return *big.NewInt(0), err
+		return 0, err
 	}
 	return id, nil
 }
 
-func (r *SubmissionPostgres) GetSubmissionByID(id big.Int) (models.Submission, error) {
+func (r *SubmissionPostgres) GetSubmissionByID(id int) (models.Submission, error) {
 	var submission models.Submission
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", submissionTable)
 	row := r.db.QueryRow(query, id)

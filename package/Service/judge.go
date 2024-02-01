@@ -1,8 +1,6 @@
 package service
 
 import (
-	"math/big"
-
 	repository "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Repository"
 )
 
@@ -14,6 +12,6 @@ func NewJudgeService(repo repository.Judge) *JudgeService {
 	return &JudgeService{repo}
 }
 
-func (s *JudgeService) CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID big.Int, timeLimit, memoryLimit int) (big.Int, error) {
+func (s *JudgeService) CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID int, timeLimit, memoryLimit int) (int, error) {
 	return s.repo.CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName, assignID, studentID, timeLimit, memoryLimit)
 }

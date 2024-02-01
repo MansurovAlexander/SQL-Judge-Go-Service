@@ -1,8 +1,6 @@
 package service
 
 import (
-	"math/big"
-
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	repository "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Repository"
 )
@@ -25,24 +23,24 @@ type BannedWord interface {
 }
 
 type Assign interface {
-	CreateAssign(assign models.Assign) (big.Int, error)
-	GetAssignByID(id big.Int) (models.Assign, error)
+	CreateAssign(assign models.Assign) (int, error)
+	GetAssignByID(id int) (models.Assign, error)
 	GetAllAssignes() ([]models.Assign, error)
 }
 
 type BannedWordToAssign interface {
-	CreateBannedWordToAssign(assignID big.Int, bannedWordID int) (big.Int, error)
-	GetBannedWordByAssignID(assignId big.Int) ([]int, error)
+	CreateBannedWordToAssign(assignID int, bannedWordID int) (int, error)
+	GetBannedWordByAssignID(assignId int) ([]int, error)
 }
 
 type Submission interface {
-	CreateSubmission(submission models.Submission) (big.Int, error)
-	GetSubmissionByID(id big.Int) (models.Submission, error)
+	CreateSubmission(submission models.Submission) (int, error)
+	GetSubmissionByID(id int) (models.Submission, error)
 	GetAllSubmissions() ([]models.Submission, error)
 }
 
 type Judge interface {
-	CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID big.Int, timeLimit, memoryLimit int) (big.Int, error)
+	CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID int, timeLimit, memoryLimit int) (int, error)
 }
 
 type Service struct {

@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	methods "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Methods"
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
 	"github.com/gin-gonic/gin"
 )
@@ -27,17 +26,12 @@ func (h *Handler) checkSubmission(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	dbmsData, err := h.services.Dbms.GetDbmsByID(databaseData.DbmsID)
+	/*databaseData.CreationScript, err = methods.PrepareDBScript(databaseData.CreationScript, databaseData.Name)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
-	}
-	databaseData.CreationScript, err = methods.PrepareDBScript(databaseData.CreationScript, dbmsData.Name)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	id, err := h.services.Judge.CheckSubmission(input.Script, databaseData.CreationScript, assignData.CorrectScript, dbmsData.Name, input.AssignID, input.StudentID, assignData.TimeLimit, assignData.MemoryLimit)
+	}*/
+	id, err := h.services.Judge.CheckSubmission(input.Script, databaseData.CreationScript, assignData.CorrectScript, databaseData.Name, input.AssignID, input.StudentID, assignData.TimeLimit, assignData.MemoryLimit)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
