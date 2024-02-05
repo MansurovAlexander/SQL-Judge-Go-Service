@@ -5,11 +5,14 @@ import (
 	handler "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Handler"
 	repository "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Repository"
 	service "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Service"
+	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+
+var db *sqlx.DB
 
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
