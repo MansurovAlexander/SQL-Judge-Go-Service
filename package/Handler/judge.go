@@ -26,6 +26,16 @@ func (h *Handler) checkSubmission(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	var bannedWords []string
+	bannedWordsToAssignData, err:=h.services.GetBannedWordByAssignID(input.AssignID)
+	for i:=range bannedWordsToAssignData{
+		bannedWord, err:=h.services.BannedWord.GetBannedWordByID(bannedWordsToAssignData[i])
+		if err!=nil{
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		bannedWords = append(bannedWords, bannedWord.BannedWord)
+	}
 	/*databaseData.CreationScript, err = methods.PrepareDBScript(databaseData.CreationScript, databaseData.Name)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())

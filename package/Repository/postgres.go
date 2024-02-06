@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	dbmsTable           = "dbms"
-	databasesTable      = "databases"
-	assignTable         = "assign"
-	submissionTable     = "submission"
-	bannedWordsTable    = "banned_words"
+	dbmsTable                = "dbms"
+	databasesTable           = "databases"
+	assignTable              = "assign"
+	submissionTable          = "submission"
+	bannedWordsTable         = "banned_words"
 	bannedWordsToAssignTable = "banned_words_to_assign"
 )
 

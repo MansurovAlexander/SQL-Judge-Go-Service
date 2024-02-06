@@ -23,3 +23,12 @@ func PrepareDBScript(script, dbName string) (string, error) {
 	pattern := regexp.MustCompile("(?i)(CREATE\\s+DATABASE.*?;|\\c.*?;|USE\\s+\\w+;)")
 	return pattern.ReplaceAllString(script, createDataBase), nil
 }
+
+func ContainsBannedWords(script string, bannedWords []string)(bool){
+	for i :=range bannedWords{
+		if strings.Contains(script, bannedWords[i]){
+			return true
+		}
+	}
+	return false
+}

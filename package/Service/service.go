@@ -20,6 +20,7 @@ type Dbms interface {
 type BannedWord interface {
 	CreateBannedWord(bannedWord models.BannedWord) (int, error)
 	GetAllBannedWords() ([]models.BannedWord, error)
+	GetBannedWordByID(id int) (models.BannedWord, error)
 }
 
 type Assign interface {

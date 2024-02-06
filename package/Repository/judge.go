@@ -21,6 +21,16 @@ func NewJudgeService(db *sqlx.DB) *JudgePostgres {
 
 func (r *JudgePostgres) CheckSubmission(inputedScript, dbCreateScript, correctScript, dbName string, assignID, studentID, timeLimit, memoryLimit int) (int, error) {
 	var grade string
+	/*if methods.ContainsBannedWords(inputedScript, bannedWords) {
+		grade = "Скрипт содержит запрещенные слова."
+		var id int
+		query := "INSERT INTO submission(assign_id, student_id, time, memory, script, grade) VALUES ($1,$2,$3,$4,$5,$6) returning id"
+		row := r.db.QueryRow(query, assignID, studentID, 0, 0, inputedScript, grade)
+		if err := row.Scan(&id); err != nil {
+			return 0, err
+		}
+		return id, nil
+	}*/
 	isExist, db, err := dbprovider.IsExist(dbName)
 	if err != nil {
 		return 0, err
@@ -68,7 +78,7 @@ func (r *JudgePostgres) CheckSubmission(inputedScript, dbCreateScript, correctSc
 	fmt.Print(correctAnswerJson)
 	if len(correctAnswerJson) != len(studentAnswersJson) {
 		grade = "Неверный ответ!"
-	} else if float32(timeLimit)!=0 && float32(totalTime) > float32(timeLimit) {
+	} else if float32(timeLimit) != 0 && float32(totalTime) > float32(timeLimit) {
 		grade = "Не выполнено ограничение по времени"
 	} else {
 		for i := 0; i < len(correctAnswerJson); i++ {
@@ -77,7 +87,9 @@ func (r *JudgePostgres) CheckSubmission(inputedScript, dbCreateScript, correctSc
 				break
 			}
 		}
-		if grade!="Неверный ответ!" {grade = "Все правильно!"}
+		if grade != "Неверный ответ!" {
+			grade = "Все правильно!"
+		}
 	} /*else if memory>memoryLimit{
 		grade="Не выполнено ограничение по времени"
 	}*/

@@ -2,9 +2,11 @@ package dbprovider
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -21,11 +23,14 @@ func IsExist(dbName string) (bool, *sqlx.DB, error) {
 	if err := initConfig(); err != nil {
 		return false, nil, err
 	}
+	if err := godotenv.Load(); err != nil {
+		return false, nil, err
+	}
 	cfg := Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: viper.GetString("db.password"),
+		Password: os.Getenv("DB_PASSWORD"),
 		SSLMode:  viper.GetString("db.sslmode"),
 	}
 	dbProvider, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=%s",
@@ -69,11 +74,14 @@ func CreateTestDB(dbName, createScript string) (*sqlx.DB, error) {
 	if err := initConfig(); err != nil {
 		return nil, err
 	}
+	if err := godotenv.Load(); err != nil {
+		return nil, err
+	}
 	cfg := Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: viper.GetString("db.password"),
+		Password: os.Getenv("DB_PASSWORD"),
 		SSLMode:  viper.GetString("db.sslmode"),
 	}
 	dbProvider, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=%s",
