@@ -1,16 +1,16 @@
 package repository
 
 import (
-	"math/big"
-
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
+	viewmodels "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/ViewModels"
 	"github.com/jmoiron/sqlx"
 )
 
 type Database interface {
+	DeleteDataBaseByID(id int) (string, error)
 	CreateDatabase(database models.Database) (int, error)
-	GetAllDatabases() ([]models.Database, error)
-	GetDatabaseByID(id int) (models.Database, error)
+	GetAllDatabases() ([]viewmodels.DatabaseViewModel, error)
+	GetDatabaseByID(id int) (viewmodels.DatabaseViewModel, error)
 }
 
 type Dbms interface {
@@ -26,20 +26,33 @@ type BannedWord interface {
 }
 
 type Assign interface {
-	CreateAssign(assign models.Assign) (big.Int, error)
-	GetAssignByID(id big.Int) (models.Assign, error)
+	CreateAssign(assign models.Assign) (int, error)
+	UpdateAssign(assign models.Assign) error
+	GetAssignByID(id int) (viewmodels.AssignViewModel, error)
 	GetAllAssignes() ([]models.Assign, error)
+	DeleteAssign(id int) error
 }
 
 type BannedWordToAssign interface {
-	CreateBannedWordToAssign(models.BannedWordToAssign) (big.Int, error)
-	GetBannedWordByAssignID(assignId big.Int) ([]int, error)
+	CreateBannedWordToAssign(assignID int, bannedWords, admissionWords map[string][]string) error
+	GetBannedWordByAssignID(assignId int) (map[string]string, error)
+	GetAdmissionWordByAssignID(id int) (map[string]string, error)
+	DropAllBannedWordsByAssignID(assignId int) error
 }
 
 type Submission interface {
-	CreateSubmission(submission models.Submission) (big.Int, error)
-	GetSubmissionByID(id big.Int) (models.Submission, error)
+	CreateSubmission(submission models.Submission) (int, error)
+	GetSubmissionByID(student_id, assign_id int) ([]models.Submission, error)
 	GetAllSubmissions() ([]models.Submission, error)
+	DeleteSubmissionsByAssignID(id int) error
+}
+
+type Judge interface {
+	CheckSubmission(inputedScript, correctScript, banned_words, admission_words map[string]string, dbFileName string, submissionID, assignID, studentID, timeLimit, memoryLimit int) (int, error)
+}
+
+type Status interface {
+	GetAllStatuses() ([]models.Status, error)
 }
 
 type Repository struct {
@@ -49,6 +62,8 @@ type Repository struct {
 	BannedWord
 	BannedWordToAssign
 	Submission
+	Judge
+	Status
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -59,5 +74,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		BannedWord:         NewBannedWordService(db),
 		BannedWordToAssign: NewBannedWordToAssignService(db),
 		Submission:         NewSubmissionService(db),
+		Judge:              NewJudgeService(db),
+		Status:             NewStatusService(db),
 	}
 }

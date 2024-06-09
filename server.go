@@ -1,4 +1,4 @@
-package sqljudge
+package server
 
 import (
 	"context"
