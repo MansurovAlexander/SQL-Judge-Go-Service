@@ -19,8 +19,8 @@ func NewAssignService(db *sqlx.DB) *AssignPostgres {
 
 func (r *AssignPostgres) CreateAssign(assign models.Assign) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (assign_id, time_limit, memory_limit, correct_script, db_id, subtask_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", assignTable)
-	row := r.db.QueryRow(query, assign.AssignID, assign.TimeLimit, assign.MemoryLimit, assign.CorrectScript, assign.DatabaseID, assign.SubtaskID)
+	query := fmt.Sprintf("INSERT INTO %s (assign_id, time_limit, memory_limit, correct_script, db_id, subtask_id, status_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", assignTable)
+	row := r.db.QueryRow(query, assign.AssignID, assign.TimeLimit, assign.MemoryLimit, assign.CorrectScript, assign.DatabaseID, assign.SubtaskID, assign.StatusID)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -28,8 +28,8 @@ func (r *AssignPostgres) CreateAssign(assign models.Assign) (int, error) {
 }
 
 func (r *AssignPostgres) UpdateAssign(assign models.Assign) error {
-	query := fmt.Sprintf("UPDATE %s SET time_limit=$1, memory_limit=$2, correct_script=$3, db_id=$4 WHERE assign_id=$5 and subtask_id=$6", assignTable)
-	_, err := r.db.Exec(query, assign.TimeLimit, assign.MemoryLimit, assign.CorrectScript, assign.DatabaseID, assign.AssignID, assign.SubtaskID)
+	query := fmt.Sprintf("UPDATE %s SET time_limit=$1, memory_limit=$2, correct_script=$3, db_id=$4, status_id=$5 WHERE assign_id=$6 and subtask_id=$7", assignTable)
+	_, err := r.db.Exec(query, assign.TimeLimit, assign.MemoryLimit, assign.CorrectScript, assign.DatabaseID, assign.StatusID, assign.AssignID, assign.SubtaskID)
 	return err
 }
 
@@ -92,4 +92,22 @@ func (r *AssignPostgres) DeleteAssign(id int) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE assign_id=$1", assignTable)
 	_, err := r.db.Exec(query, id)
 	return err
+}
+
+func (r *AssignPostgres) GetAssignScriptsByID(id int) (map[int]models.Assign, error) {
+	scripts := make(map[int]models.Assign)
+	query := fmt.Sprintf("SELECT subtask_id, correct_script, status_id FROM %s WHERE assign_id = $1 ORDER BY subtask_id", assignTable)
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var temp models.Assign
+		err := rows.Scan(&temp.SubtaskID, &temp.CorrectScript, &temp.StatusID)
+		if err != nil {
+			return scripts, err
+		}
+		scripts[temp.SubtaskID] = temp
+	}
+	return scripts, nil
 }

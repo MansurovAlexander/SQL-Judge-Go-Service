@@ -19,18 +19,13 @@ type Dbms interface {
 	GetDbmsByID(id int) (models.Dbms, error)
 }
 
-type BannedWord interface {
-	CreateBannedWord(bannedWord models.BannedWord) (int, error)
-	GetAllBannedWords() ([]models.BannedWord, error)
-	GetBannedWordByID(id int) (models.BannedWord, error)
-}
-
 type Assign interface {
 	CreateAssign(assign models.Assign) (int, error)
 	UpdateAssign(assign models.Assign) error
 	GetAssignByID(id int) (viewmodels.AssignViewModel, error)
 	GetAllAssignes() ([]models.Assign, error)
 	DeleteAssign(id int) error
+	GetAssignScriptsByID(id int) (map[int]models.Assign, error)
 }
 
 type BannedWordToAssign interface {
@@ -45,10 +40,8 @@ type Submission interface {
 	GetSubmissionByID(student_id, assign_id int) ([]models.Submission, error)
 	GetAllSubmissions() ([]models.Submission, error)
 	DeleteSubmissionsByAssignID(id int) error
-}
-
-type Judge interface {
-	CheckSubmission(inputedScript, correctScript, banned_words, admission_words map[string]string, dbFileName string, submissionID, assignID, studentID, timeLimit, memoryLimit int) (int, error)
+	GetByUserAssignSubTaskID(assignID, subtaskID, studentID int) bool
+	UpdateSubmission(submission models.Submission) error
 }
 
 type Status interface {
@@ -58,11 +51,9 @@ type Status interface {
 type Service struct {
 	Database
 	Dbms
-	BannedWord
 	Assign
 	BannedWordToAssign
 	Submission
-	Judge
 	Status
 }
 
@@ -71,10 +62,8 @@ func NewService(repos *repository.Repository) *Service {
 		Dbms:               NewDbmsService(repos.Dbms),
 		Database:           NewDatabaseService(repos.Database),
 		Assign:             NewAssignService(repos.Assign),
-		BannedWord:         NewBannedWordService(repos.BannedWord),
 		BannedWordToAssign: NewBannedWordToAssignService(repos.BannedWordToAssign),
 		Submission:         NewSubmissionService(repos.Submission),
-		Judge:              NewJudgeService(repos.Judge),
 		Status:             NewStatusService(repos.Status),
 	}
 }

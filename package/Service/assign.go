@@ -33,3 +33,7 @@ func (s *AssignService) GetAllAssignes() ([]models.Assign, error) {
 func (s *AssignService) DeleteAssign(id int) error {
 	return s.repo.DeleteAssign(id)
 }
+
+func (s *AssignService) GetAssignScriptsByID(id int) (map[int]models.Assign, error) {
+	return s.repo.GetAssignScriptsByID(id)
+}

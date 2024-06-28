@@ -25,14 +25,30 @@ func (h *Handler) updateAssign(c *gin.Context) {
 	}
 
 	correctScripts := components.PrepareScripts(input.CorrectScript)
+
+	databaseData, err := h.services.Database.GetDataBaseByID(input.DatabaseID)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	checkScriptsResult, err := components.CheckAssignScripts(correctScripts, databaseData.Name)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
 	for key, value := range correctScripts {
 		var assignInputedData models.Assign
+		key_to_int, _ := strconv.Atoi(key)
+
 		assignInputedData.AssignID = input.AssignID
-		assignInputedData.SubtaskID, _ = strconv.Atoi(key)
+		assignInputedData.SubtaskID = key_to_int
 		assignInputedData.TimeLimit = input.TimeLimit
 		assignInputedData.MemoryLimit = input.MemoryLimit
 		assignInputedData.CorrectScript = value
 		assignInputedData.DatabaseID = input.DatabaseID
+		assignInputedData.StatusID = checkScriptsResult[key_to_int].Result
+
 		err := h.services.Assign.UpdateAssign(assignInputedData)
 		if err != nil {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -49,7 +65,7 @@ func (h *Handler) updateAssign(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{})
+	c.JSON(http.StatusOK, checkScriptsResult)
 }
 
 func (h *Handler) createAssign(c *gin.Context) {
@@ -64,14 +80,29 @@ func (h *Handler) createAssign(c *gin.Context) {
 		return
 	}
 	correctScripts := components.PrepareScripts(input.CorrectScript)
+
+	databaseData, err := h.services.Database.GetDataBaseByID(input.DatabaseID)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	checkScriptsResult, err := components.CheckAssignScripts(correctScripts, databaseData.Name)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
 	for key, value := range correctScripts {
 		var assignInputedData models.Assign
+		key_to_int, _ := strconv.Atoi(key)
 		assignInputedData.AssignID = input.AssignID
-		assignInputedData.SubtaskID, _ = strconv.Atoi(key)
+		assignInputedData.SubtaskID = key_to_int
 		assignInputedData.TimeLimit = input.TimeLimit
 		assignInputedData.MemoryLimit = input.MemoryLimit
 		assignInputedData.CorrectScript = value
 		assignInputedData.DatabaseID = input.DatabaseID
+		assignInputedData.StatusID = checkScriptsResult[key_to_int].Result
+
 		_, err := h.services.Assign.CreateAssign(assignInputedData)
 		if err != nil {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -83,9 +114,7 @@ func (h *Handler) createAssign(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "ok",
-	})
+	c.JSON(http.StatusOK, checkScriptsResult)
 }
 
 func (h *Handler) getAssignByID(c *gin.Context) {
@@ -139,6 +168,21 @@ func (h *Handler) getAllAssignes(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, assignList)
+}
+
+func (h *Handler) getCorrectScripts(c *gin.Context) {
+	var input int
+	input, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	correctScripts, err := h.services.Assign.GetAssignScriptsByID(input)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, correctScripts)
 }
 
 /*func (h *Handler) getAllBannedWords(c *gin.Context) {

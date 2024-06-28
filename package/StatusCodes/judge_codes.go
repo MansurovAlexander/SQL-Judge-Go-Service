@@ -10,4 +10,5 @@ const (
 	JudgeStatusUnknownError      = 6
 	JudgeStatusNotChecked        = 7
 	JudgeStatusChecked           = 8
+	JudgeStatusEmptyOutput       = 9
 )

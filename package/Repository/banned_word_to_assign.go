@@ -17,23 +17,13 @@ func NewBannedWordToAssignService(db *sqlx.DB) *BannedWordToAssignPostgres {
 }
 
 func (r *BannedWordToAssignPostgres) CreateBannedWordToAssign(assignID int, bannedWords, admissionWords map[string][]string) error {
+
 	if len(bannedWords) > len(admissionWords) {
 		for k, _ := range bannedWords {
+
 			subtask, _ := strconv.Atoi(k)
-			query := fmt.Sprintf("INSERT INTO %s (assign_id, banned_words, subtask_id) VALUES ($1, $2, $3)", bannedWordsToAssignTable)
-			_, err := r.db.Exec(query, assignID, bannedWords[k][0], subtask)
-			if err != nil {
-				return err
-			}
-		}
-		for k, _ := range admissionWords {
-			subtask, _ := strconv.Atoi(k)
-			var admissionWordsSB strings.Builder
-			admissionWordsSB.WriteString("'")
-			admissionWordsSB.WriteString(admissionWords[k][0])
-			admissionWordsSB.WriteString("'")
-			query := fmt.Sprintf("UPDATE %s SET admission_words = $1 WHERE assign_id = $2 AND subtask_id = $3", bannedWordsToAssignTable)
-			_, err := r.db.Exec(query, admissionWordsSB.String(), assignID, subtask)
+			query := fmt.Sprintf("INSERT INTO %s (assign_id, banned_words, admission_words, subtask_id) VALUES ($1, $2, $3, $4)", bannedWordsToAssignTable)
+			_, err := r.db.Exec(query, assignID, strings.Join(bannedWords[k], " "), strings.Join(admissionWords[k], " "), subtask)
 			if err != nil {
 				return err
 			}
@@ -41,20 +31,8 @@ func (r *BannedWordToAssignPostgres) CreateBannedWordToAssign(assignID int, bann
 	} else {
 		for k, _ := range admissionWords {
 			subtask, _ := strconv.Atoi(k)
-			query := fmt.Sprintf("INSERT INTO %s (assign_id, admission_words, subtask_id) VALUES ($1, $2, $3)", bannedWordsToAssignTable)
-			_, err := r.db.Exec(query, assignID, admissionWords[k][0], subtask)
-			if err != nil {
-				return err
-			}
-		}
-		for k, _ := range bannedWords {
-			subtask, _ := strconv.Atoi(k)
-			var bannedWordsSB strings.Builder
-			bannedWordsSB.WriteString("'")
-			bannedWordsSB.WriteString(bannedWords[k][0])
-			bannedWordsSB.WriteString("'")
-			query := fmt.Sprintf("UPDATE %s SET banned_words = $1 WHERE assign_id = $2 AND subtask_id = $3", bannedWordsToAssignTable)
-			_, err := r.db.Exec(query, bannedWordsSB.String(), assignID, subtask)
+			query := fmt.Sprintf("INSERT INTO %s (assign_id, banned_words, admission_words, subtask_id) VALUES ($1, $2, $3, $4)", bannedWordsToAssignTable)
+			_, err := r.db.Exec(query, assignID, strings.Join(bannedWords[k], " "), strings.Join(admissionWords[k], " "), subtask)
 			if err != nil {
 				return err
 			}

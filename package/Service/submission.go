@@ -28,3 +28,11 @@ func (s *SubmissionService) GetAllSubmissions() ([]models.Submission, error) {
 func (s *SubmissionService) DeleteSubmissionsByAssignID(id int) error {
 	return s.repo.DeleteSubmissionsByAssignID(id)
 }
+
+func (s *SubmissionService) GetByUserAssignSubTaskID(assignID, subtaskID, studentID int) bool {
+	return s.repo.GetByUserAssignSubTaskID(assignID, subtaskID, studentID)
+}
+
+func (s *SubmissionService) UpdateSubmission(submission models.Submission) error {
+	return s.repo.UpdateSubmission(submission)
+}

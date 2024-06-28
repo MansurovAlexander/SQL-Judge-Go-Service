@@ -15,7 +15,7 @@ func NewHandler(services *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes(server_ip_4, server_ip_6 string) *gin.Engine {
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	whitelist := make(map[string]bool)
 	whitelist[server_ip_4] = true
@@ -53,6 +53,10 @@ func (h *Handler) InitRoutes(server_ip_4, server_ip_6 string) *gin.Engine {
 			assignes.DELETE("/:id", h.deleteAssign)
 			assignes.GET("/", h.getAllAssignes)
 			assignes.GET("/:id", h.getAssignByID)
+			scripts := assignes.Group("/scripts")
+			{
+				scripts.GET("/:id", h.getCorrectScripts)
+			}
 		}
 		statuses := api.Group("/statuses")
 		{

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 
 	models "github.com/MansurovAlexander/SQL-Judge-Moodle-Plugin/package/Models"
@@ -17,8 +18,8 @@ func NewSubmissionService(db *sqlx.DB) *SubmissionPostgres {
 
 func (r *SubmissionPostgres) CreateSubmission(submission models.Submission) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO %s (submission_id, student_id, time, memory, script, status, assign_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", submissionTable)
-	row := r.db.QueryRow(query, submission.SubmissionID, submission.StudentID, submission.Time, submission.Memory, submission.Script, submission.Status, submission.AssignID)
+	query := fmt.Sprintf("INSERT INTO %s (submission_id, student_id, time, memory, script, status_id, assign_id, subtask_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id", submissionTable)
+	row := r.db.QueryRow(query, submission.SubmissionID, submission.StudentID, submission.Time, submission.Memory, submission.Script, submission.Status, submission.AssignID, submission.SubtaskID)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -69,4 +70,24 @@ func (r *SubmissionPostgres) DeleteSubmissionsByAssignID(id int) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE assign_id=$1", submissionTable)
 	_, err := r.db.Exec(query, id)
 	return err
+}
+
+func (r *SubmissionPostgres) GetByUserAssignSubTaskID(assignID, subtaskID, studentID int) bool {
+	query := fmt.Sprintf("SELECT 1 FROM %s WHERE assign_id = $1 AND subtask_id = $2 AND student_id = $3", submissionTable)
+	rows := r.db.QueryRow(query, assignID, subtaskID, studentID)
+	if err := rows.Scan(); err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		}
+	}
+	return true
+}
+
+func (r *SubmissionPostgres) UpdateSubmission(submission models.Submission) error {
+	query := fmt.Sprintf("UPDATE %s SET script = $1, time = $2, memory = $3, status_id = $4 WHERE assign_id = $5 AND subtask_id = $6 AND student_id = $7", submissionTable)
+	_, err := r.db.Exec(query, submission.Script, submission.Time, submission.Memory, submission.Status, submission.AssignID, submission.SubtaskID, submission.StudentID)
+	if err != nil {
+		return err
+	}
+	return nil
 }

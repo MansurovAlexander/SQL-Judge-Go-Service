@@ -38,10 +38,9 @@ func PrepareUser(db *sqlx.DB, dbName string) error {
 	stPswd.WriteString("'")
 	checkRole.WriteString("SELECT 1 FROM pg_roles WHERE rolname = ")
 	checkRole.WriteString(stRole.String())
-	if err := db.QueryRow(checkRole.String()).Scan(&count); err != sql.ErrNoRows { //, stRole.String()).Scan(&count); err != nil {
+	if err := db.QueryRow(checkRole.String()).Scan(&count); err != sql.ErrNoRows { 
 		return err
 	} else {
-		//_, err := db.Exec(fmt.Sprintf("CREATE ROLE %s WITH NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT LOGIN PASSWORD %s", studentRole, stPswd.String())) //, viper.GetString("student_role"), os.Getenv("STUDENT_PASSWORD"))) //viper.GetString("student_role")
 		_, err := db.Exec(fmt.Sprintf("CREATE USER %s WITH PASSWORD %s", studentRole, stPswd.String())) //, viper.GetString("student_role"), os.Getenv("STUDENT_PASSWORD"))) //viper.GetString("student_role")
 		if err != nil {
 			return err
@@ -55,10 +54,6 @@ func PrepareUser(db *sqlx.DB, dbName string) error {
 	if err != nil {
 		return err
 	}
-	/*_, err = db.Exec(fmt.Sprintf("GRANT SELECT, INSERT, UPDATE, DELETE, TRIGGER ON ALL TABLES IN SCHEMA public TO %s", studentRole))
-	if err != nil {
-		return err
-	}*/
 	return nil
 }
 
